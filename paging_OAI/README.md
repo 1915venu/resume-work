@@ -23,12 +23,10 @@
 
 ## 1. Opening Pitch
 
-When asked *"Tell me about your paging implementation"*, use this:
 
 > *"I implemented 5G NR SA paging end-to-end in OAI's gNB stack. The flow starts at the NGAP layer receiving paging from the AMF with the UE's 5G-S-TMSI and TAI list. At RRC, I compute Paging Frame and Paging Occasion per TS 38.304 — UE_ID is derived from the S-TMSI, then PF and PO are calculated from the DRX cycle, the ratio N, and Ns. I encode the PCCH message using ASN.1 and pass it directly to MAC, bypassing PDCP/RLC since paging is broadcast with no per-UE context. At MAC, I schedule it on the matching frame/slot using DCI Format 1_0 with P-RNTI on CORESET0. I also modified the Wireshark T-tracer to correctly decode P-RNTI PDUs. In a second iteration, I extended it for multi-UE paging, fixed the DCI bit packing to match TS 38.212 exactly, and handled PHY-layer rate matching crashes for small paging TBs."*
 
-> [!TIP]
-> **Pause here.** Let the interviewer pick what interests them. Have depth ready for each layer.
+
 
 ---
 
@@ -82,8 +80,6 @@ Use this when the interviewer says *"Walk me through the complete flow in detail
 
 > *"In V2, I hardened this for correctness and multi-UE support. Four changes: (1) **DCI bit packing** — V1 wrongly reused SI-RNTI field layout; P-RNTI DCI has Short Message Indicator and TB Scaling fields instead of HARQ/NDI/TPC fields since paging has no feedback, per TS 38.212. (2) **UE identity** — V1 used raw 32-bit m_tmsi for UE_ID; the spec requires the full 48-bit 5G-S-TMSI mod 1024 — I had to bit-shift AMF Set ID, AMF Pointer, and 5G-TMSI together. (3) **Multi-UE** — V1 hardcoded PF/PO table to index [0][0]; V2 uses a two-pass insertion: first scan for existing entry to update, then find first free slot. (4) **PHY rate matching crash** — small paging TBs (~7 bytes) caused the LDPC rate matcher's filler offset to exceed the circular buffer size, causing OOB memory access. I added clamping and a repetition loop to handle this edge case. This was a great cross-layer debugging story — a MAC scheduling decision exposed a PHY edge case."*
 
-> [!TIP]
-> **Timing:** The full narrative above takes ~4–5 minutes. If the interviewer looks like they want to interrupt, pause after the MAC scheduling section — that's the natural breakpoint. Save V2 for when they ask "any challenges?" or "what did you improve?"
 
 ---
 
